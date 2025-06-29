@@ -1,0 +1,85 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Unofficial Chrome Web Store</title>
+	<link rel="icon" href="https://fonts.gstatic.com/s/i/productlogos/chrome_store/v7/192px.svg" type="image/x-icon">
+    <link rel="stylesheet" href="styles.css">
+    <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;500&display=swap" rel="stylesheet">
+</head>
+<body>
+    <div class="container">
+        <img src="https://fonts.gstatic.com/s/i/productlogos/chrome_store/v7/192px.svg" alt="Logo" class="logo">
+        <h1>Download Extensions w/o Chrome</h1>
+        <div class="search-container">
+            <input type="text" id="extensionURL" class="search-input" placeholder="https://chromewebstore.google.com/detail/...">
+            <button id="searchButton" class="search-button" onclick="onSearch()" disabled>Download</button>
+        </div>
+    </div>
+
+    <script>
+        let url1 = "https://clients2.google.com/service/update2/crx?response=redirect&acceptformat=crx2,crx3&prodversion=";
+        let url2 = "&x=id%3D";
+        let url3 = "%26installsource%3Dondemand%26uc";
+        let versionDropdown = document.getElementById("versionDropdown");
+        let versionArray = [];
+		let version = "138"; // check your version on chrome://settings/help
+        let extensionID;
+        let userURL;
+        let finalURL;
+        let checkValidFlag = false;
+        let error = document.getElementById("errorMessage");
+
+        function onSearch() {
+            userURL = document.getElementById("extensionURL").value;
+            extensionID = userURL.split("/").pop().split('?')[0];
+            finalURL = url1 + version + url2 + extensionID + url3;
+            console.log(finalURL);
+            urlExists(finalURL);
+        }
+
+        async function urlExists(furl) {
+            const resp = await fetch(furl, { method: 'HEAD' })
+            .then(function(response) {
+                if (response.ok) {
+                    console.log("Extension URL exists");
+                    checkValidFlag = true;
+                    window.location.href = finalURL;
+                } else {
+                    console.log("Extension URL does not exist");
+                    showError("Extension URL does not exist");
+                }
+            })
+            .catch((err) => {
+                console.log("A CORS error has occurred: ", err);
+                checkValidFlag = true;
+                window.location.href = finalURL;
+            });
+        }
+
+        function showError(message) {
+            error.style.display = "flex";
+            error.innerHTML = message;
+            setTimeout(() => {
+                error.style.display = "none";
+            }, 3000);
+        }
+		
+		document.addEventListener("DOMContentLoaded", function() {
+		const searchInput = document.getElementById("extensionURL");
+		const searchButton = document.getElementById("searchButton");
+
+		function checkInput() {
+			if (searchInput.value.trim() === "") {
+				searchButton.disabled = true;
+			} else {
+				searchButton.disabled = false;
+			}
+		}
+		
+		searchInput.addEventListener("input", checkInput);
+		});
+    </script>
+</body>
+</html>
